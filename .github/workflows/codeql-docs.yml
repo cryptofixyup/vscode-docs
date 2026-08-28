@@ -1,0 +1,61 @@
+name: CodeQL Documentation Analysis
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**.md'
+      - '**.json'
+      - '**.yml'
+      - '**.yaml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**.md'
+      - '**.json'
+      - '**.yml'
+      - '**.yaml'
+  schedule:
+    - cron: '0 3 * * 1'  # Every Monday at 3 AM UTC
+
+jobs:
+  analyze:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript,json
+          config: |
+            {
+              "paths": ["."],
+              "paths-ignore": [".git", "node_modules"],
+              "queries": [
+                "+security-extended"
+              ]
+            }
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript"
+          output: codeql-results
+
+      - name: Upload CodeQL Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: codeql-results
+          path: codeql-results
+          retention-days: 30

@@ -1,0 +1,42 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlist for documentation false positives"
+paths = [
+  '''docs/.*''',
+  '''examples/.*''',
+  '''.*\.md$'''
+]
+
+regexes = [
+  # Ignore example URLs
+  '''https?://example\.com''',
+  '''https?://[a-z]+\.placeholder\.com''',
+  # Ignore test tokens
+  '''test_token|sample_key|example_secret'''
+]
+
+[[rules]]
+id = "documentation-api-key"
+description = "API Key in Documentation"
+regex = '''(?i)(api[_-]?key|apikey|api[_-]?secret)['"]?\s*[:=]\s*['"]?[a-zA-Z0-9_\-]{16,}['"]?'''
+tags = ["api", "secret", "documentation"]
+
+[[rules]]
+id = "documentation-token"
+description = "Token in Documentation"
+regex = '''(?i)(token|access[_-]?token|auth[_-]?token)['"]?\s*[:=]\s*['"]?[a-zA-Z0-9_\-]{20,}['"]?'''
+tags = ["token", "documentation"]
+
+[[rules]]
+id = "documentation-password"
+description = "Password in Documentation"
+regex = '''(?i)(password|passwd|pwd)['"]?\s*[:=]\s*['"]?[^\s'"]{8,}['"]?'''
+tags = ["password", "documentation"]
+
+[[rules]]
+id = "documentation-credentials"
+description = "Credentials in Documentation"
+regex = '''(?i)(username|user|login|credentials?|creds)['"]?\s*[:=]\s*['"]?[^\s'"]+['"]?\s*[,;]?\s*(password|passwd|pwd)['"]?\s*[:=]\s*['"]?[^\s'"]{8,}['"]?'''
+tags = ["credentials", "documentation"]

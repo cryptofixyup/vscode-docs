@@ -1,0 +1,27 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^https://github.com/.*/blob/.*"
+    },
+    {
+      "pattern": "^https://github.com/.*/tree/.*"
+    },
+    {
+      "pattern": "^https://docs.github.com/.*"
+    },
+    {
+      "pattern": "^https://code.visualstudio.com/.*"
+    },
+    {
+      "pattern": "^https://marketplace.visualstudio.com/.*"
+    }
+  ],
+  "replacementPatterns": [
+    {
+      "pattern": "^(\.\./)+",
+      "replacement": ""
+    }
+  ],
+  "maxDepth": 5,
+  "timeout": 30000
+}
