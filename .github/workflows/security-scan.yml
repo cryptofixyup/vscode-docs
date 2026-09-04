@@ -46,9 +46,10 @@ jobs:
 
       - name: Check Markdown Links
         run: |
-          find . -name "*.md" -type f | xargs markdown-link-check \
+          set -o pipefail
+          find . -name "*.md" -type f -print0 | xargs -0 -r markdown-link-check \
             --config .markdown-link-check.json \
-            --quiet || true
+            --quiet
 
   yaml-validate:
     name: YAML Validation
@@ -65,7 +66,7 @@ jobs:
           yamllint . \
             --config-file .yamllint.yml \
             --format parsable \
-            --strict || true
+            --strict
 
   json-validate:
     name: JSON Validation
@@ -79,10 +80,11 @@ jobs:
 
       - name: Validate JSON Files
         run: |
-          find . -name "*.json" -type f | while read file; do
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
             echo "Validating $file"
-            jq empty "$file" || echo "Invalid JSON: $file"
-          done || true
+            jq empty "$file"
+          done < <(find . -name "*.json" -type f -print0)
 
   secret-scan:
     name: TruffleHog Secret Scan
