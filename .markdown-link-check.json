@@ -23,6 +23,15 @@
     },
     {
       "pattern": "^https?://localhost(:[0-9]+)?(/|$)"
+    },
+    {
+      "pattern": "^/docs/.*"
+    },
+    {
+      "pattern": "^/remote/.*"
+    },
+    {
+      "pattern": "^/remote-release-notes/.*"
     }
   ],
   "replacementPatterns": [
