@@ -8,6 +8,7 @@ on:
       - '**.json'
       - '**.yml'
       - '**.yaml'
+      - '.gitleaks-docs.toml'
   pull_request:
     branches: [ main ]
     paths:
@@ -15,6 +16,7 @@ on:
       - '**.json'
       - '**.yml'
       - '**.yaml'
+      - '.gitleaks-docs.toml'
   schedule:
     - cron: '0 0 * * *'
 
