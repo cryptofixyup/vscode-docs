@@ -20,6 +20,9 @@
     },
     {
       "pattern": "^mailto:"
+    },
+    {
+      "pattern": "^https?://localhost(:[0-9]+)?(/|$)"
     }
   ],
   "replacementPatterns": [
