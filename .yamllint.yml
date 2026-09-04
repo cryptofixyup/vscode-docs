@@ -15,10 +15,6 @@ rules:
     spaces: 2
     indent-sequences: consistent
 
-  quotes:
-    required: false
-    extra-allowed: ["'", '"']
-
   trailing-spaces: enable
 
   document-start: disable
