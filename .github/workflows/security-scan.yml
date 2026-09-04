@@ -34,6 +34,7 @@ jobs:
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
           path: .validation-policy
           sparse-checkout: .gitleaks-docs.toml
+          sparse-checkout-cone-mode: false
 
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -56,6 +57,7 @@ jobs:
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
           path: .validation-policy
           sparse-checkout: .markdown-link-check.json
+          sparse-checkout-cone-mode: false
 
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -80,6 +82,7 @@ jobs:
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
           path: .validation-policy
           sparse-checkout: .yamllint.yml
+          sparse-checkout-cone-mode: false
 
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
