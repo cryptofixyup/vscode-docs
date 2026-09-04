@@ -38,14 +38,11 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: javascript
-          config: |
-            {
-              "paths": ["."],
-              "paths-ignore": [".git", "node_modules"],
-              "queries": [
-                "+security-extended"
-              ]
-            }
+          queries: +security-extended
+          paths: .
+          paths-ignore: |
+            .git
+            node_modules
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
