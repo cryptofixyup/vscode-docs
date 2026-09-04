@@ -97,8 +97,4 @@ jobs:
         uses: trufflesecurity/trufflehog@main
         with:
           path: .
-          base: main
-          head: HEAD
-          filter: files
-          only-verified: true
-          fail: false
+          extra_args: --only-verified
