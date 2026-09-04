@@ -26,6 +26,13 @@ jobs:
     name: Gitleaks for Documentation
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout validation policy
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+          path: .validation-policy
+          sparse-checkout: .gitleaks-docs.toml
+
       - name: Checkout code
         uses: actions/checkout@v6
         with:
@@ -35,12 +42,19 @@ jobs:
         uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_CONFIG: .gitleaks-docs.toml
+          GITLEAKS_CONFIG: .validation-policy/.gitleaks-docs.toml
 
   markdown-link-check:
     name: Markdown Link Checker
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout validation policy
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+          path: .validation-policy
+          sparse-checkout: .markdown-link-check.json
+
       - name: Checkout code
         uses: actions/checkout@v6
 
@@ -50,14 +64,21 @@ jobs:
       - name: Check Markdown Links
         run: |
           set -o pipefail
-          find . -name "*.md" -type f -print0 | xargs -0 -r markdown-link-check \
-            --config .markdown-link-check.json \
+          find . -path './.validation-policy' -prune -o -name "*.md" -type f -print0 | xargs -0 -r markdown-link-check \
+            --config .validation-policy/.markdown-link-check.json \
             --quiet
 
   yaml-validate:
     name: YAML Validation
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout validation policy
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+          path: .validation-policy
+          sparse-checkout: .yamllint.yml
+
       - name: Checkout code
         uses: actions/checkout@v6
 
@@ -68,7 +89,7 @@ jobs:
         run: |
           yamllint \
             .github/workflows \
-            --config-file .yamllint.yml \
+            --config-file .validation-policy/.yamllint.yml \
             --format parsable \
             --strict
 
