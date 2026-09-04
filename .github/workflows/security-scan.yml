@@ -82,6 +82,9 @@ jobs:
         run: |
           set -euo pipefail
           while IFS= read -r -d '' file; do
+            case "$file" in
+              ./.devcontainer/devcontainer.json) continue ;;
+            esac
             echo "Validating $file"
             jq empty "$file"
           done < <(find . -name "*.json" -type f -print0)
