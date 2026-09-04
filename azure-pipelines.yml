@@ -68,3 +68,4 @@ jobs:
       workingDirectory: ../vscode-website
     env:
       DOCS_BRANCH: $(Build.SourceBranchName)
+
