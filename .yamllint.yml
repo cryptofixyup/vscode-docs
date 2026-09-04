@@ -13,7 +13,7 @@ rules:
 
   indentation:
     spaces: 2
-    indent-sequences: false
+    indent-sequences: consistent
 
   trailing-spaces: enable
 
