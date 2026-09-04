@@ -83,7 +83,9 @@ jobs:
           set -euo pipefail
           while IFS= read -r -d '' file; do
             case "$file" in
-              ./.devcontainer/devcontainer.json|./.vscode/settings.json|./.vscode/extensions/doc-assistant/.vscode/settings.json) continue ;;
+              ./.devcontainer/devcontainer.json|./.vscode/settings.json|./.vscode/extensions/doc-assistant/.vscode/settings.json|./.vscode/extensions/doc-assistant/.vscode/launch.json)
+                continue
+                ;;
             esac
             echo "Validating $file"
             jq empty "$file"
