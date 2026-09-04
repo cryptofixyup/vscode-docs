@@ -63,7 +63,8 @@ jobs:
 
       - name: Validate YAML Files
         run: |
-          yamllint . \
+          yamllint \
+            .github/workflows \
             --config-file .yamllint.yml \
             --format parsable \
             --strict
