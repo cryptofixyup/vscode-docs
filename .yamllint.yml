@@ -32,7 +32,6 @@ rules:
   # Relax some rules for documentation files
   commas:
     max-spaces-before: 1
-    min-spaces-after: 1
     max-spaces-after: 1
 
   brackets:
