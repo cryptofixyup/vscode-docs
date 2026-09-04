@@ -28,13 +28,17 @@ jobs:
     name: Gitleaks for Documentation
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout validation policy
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
-          path: .validation-policy
-          sparse-checkout: .gitleaks-docs.toml
-          sparse-checkout-cone-mode: false
+      - name: Fetch trusted validation policy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATION_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/validation-policy"
+          curl --fail --silent --show-error --location \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header "Accept: application/vnd.github.raw+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/contents/.gitleaks-docs.toml?ref=$VALIDATION_REF" \
+            --output "$RUNNER_TEMP/validation-policy/.gitleaks-docs.toml"
 
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -45,19 +49,23 @@ jobs:
         uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_CONFIG: .validation-policy/.gitleaks-docs.toml
+          GITLEAKS_CONFIG: ${{ runner.temp }}/validation-policy/.gitleaks-docs.toml
 
   markdown-link-check:
     name: Markdown Link Checker
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout validation policy
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
-          path: .validation-policy
-          sparse-checkout: .markdown-link-check.json
-          sparse-checkout-cone-mode: false
+      - name: Fetch trusted validation policy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATION_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/validation-policy"
+          curl --fail --silent --show-error --location \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header "Accept: application/vnd.github.raw+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/contents/.markdown-link-check.json?ref=$VALIDATION_REF" \
+            --output "$RUNNER_TEMP/validation-policy/.markdown-link-check.json"
 
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -68,21 +76,25 @@ jobs:
       - name: Check Markdown Links
         run: |
           set -o pipefail
-          find . -path './.validation-policy' -prune -o -name "*.md" -type f -print0 | xargs -0 -r markdown-link-check \
-            --config .validation-policy/.markdown-link-check.json \
+          find . -name "*.md" -type f -print0 | xargs -0 -r markdown-link-check \
+            --config ${{ runner.temp }}/validation-policy/.markdown-link-check.json \
             --quiet
 
   yaml-validate:
     name: YAML Validation
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout validation policy
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
-          path: .validation-policy
-          sparse-checkout: .yamllint.yml
-          sparse-checkout-cone-mode: false
+      - name: Fetch trusted validation policy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATION_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/validation-policy"
+          curl --fail --silent --show-error --location \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header "Accept: application/vnd.github.raw+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/contents/.yamllint.yml?ref=$VALIDATION_REF" \
+            --output "$RUNNER_TEMP/validation-policy/.yamllint.yml"
 
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -94,7 +106,7 @@ jobs:
         run: |
           yamllint \
             .github/workflows \
-            --config-file .validation-policy/.yamllint.yml \
+            --config-file ${{ runner.temp }}/validation-policy/.yamllint.yml \
             --format parsable \
             --strict
 
