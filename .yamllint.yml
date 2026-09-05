@@ -25,13 +25,14 @@ rules:
   document-end: disable
 
   truthy:
-    allowed-values: [true, false, yes, no, on, off]
+    allowed-values: ["true", "false", "yes", "no", "on", "off"]
 
   empty-values: disable
 
   # Relax some rules for documentation files
   commas:
     max-spaces-before: 1
+    min-spaces-after: 1
     max-spaces-after: 1
 
   brackets:
@@ -40,5 +41,4 @@ rules:
 
   colons:
     max-spaces-before: 0
-    min-spaces-after: 1
     max-spaces-after: 1
