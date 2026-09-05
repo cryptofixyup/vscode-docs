@@ -40,5 +40,4 @@ rules:
 
   colons:
     max-spaces-before: 0
-    min-spaces-after: 1
     max-spaces-after: 1

@@ -18,10 +18,9 @@
   ],
   "replacementPatterns": [
     {
-      "pattern": "^(\.\./)+",
+      "pattern": "^(\\.\\./)+",
       "replacement": ""
     }
   ],
-  "maxDepth": 5,
-  "timeout": 30000
+  "maxDepth": 5
 }
