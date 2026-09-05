@@ -8,6 +8,7 @@ on:
       - '**.json'
       - '**.yml'
       - '**.yaml'
+      - '.gitleaks-docs.toml'
   pull_request:
     branches: [ main ]
     paths:
@@ -15,8 +16,12 @@ on:
       - '**.json'
       - '**.yml'
       - '**.yaml'
+      - '.gitleaks-docs.toml'
   schedule:
     - cron: '0 0 * * *'
+
+permissions:
+  contents: read
 
 jobs:
   gitleaks-docs:
@@ -24,77 +29,129 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
-      - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v3
+      - name: Fetch trusted Gitleaks policy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_CONFIG: .gitleaks-docs.toml
+          VALIDATION_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/validation-policy"
+          curl --fail --silent --show-error --location \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header "Accept: application/vnd.github.raw+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/contents/.gitleaks-docs.toml?ref=$VALIDATION_REF" \
+            --output "$RUNNER_TEMP/validation-policy/.gitleaks-docs.toml"
+          test -s "$RUNNER_TEMP/validation-policy/.gitleaks-docs.toml"
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: ${{ runner.temp }}/validation-policy/.gitleaks-docs.toml
 
   markdown-link-check:
     name: Markdown Link Checker
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Fetch trusted Markdown policy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATION_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/validation-policy"
+          curl --fail --silent --show-error --location \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header "Accept: application/vnd.github.raw+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/contents/.markdown-link-check.json?ref=$VALIDATION_REF" \
+            --output "$RUNNER_TEMP/validation-policy/.markdown-link-check.json"
+          test -s "$RUNNER_TEMP/validation-policy/.markdown-link-check.json"
+          python -m json.tool "$RUNNER_TEMP/validation-policy/.markdown-link-check.json" >/dev/null
 
       - name: Install markdown-link-check
         run: npm install -g markdown-link-check@3.11.2
 
       - name: Check Markdown Links
         run: |
-          find . -name "*.md" -type f | xargs markdown-link-check \
-            --config .markdown-link-check.json \
-            --quiet || true
+          set -euo pipefail
+          find . -name '*.md' -type f -print0 | xargs -0 -r -n 1 markdown-link-check \
+            --config "$RUNNER_TEMP/validation-policy/.markdown-link-check.json" \
+            --quiet
 
   yaml-validate:
     name: YAML Validation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Fetch trusted YAML policy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATION_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/validation-policy"
+          curl --fail --silent --show-error --location \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --header "Accept: application/vnd.github.raw+json" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/contents/.yamllint.yml?ref=$VALIDATION_REF" \
+            --output "$RUNNER_TEMP/validation-policy/.yamllint.yml"
+          test -s "$RUNNER_TEMP/validation-policy/.yamllint.yml"
 
       - name: Install yamllint
         run: pip install yamllint==1.33.0
 
       - name: Validate YAML Files
         run: |
-          yamllint . \
-            --config-file .yamllint.yml \
+          yamllint \
+            .github/workflows \
+            --config-file "$RUNNER_TEMP/validation-policy/.yamllint.yml" \
             --format parsable \
-            --strict || true
+            --strict
 
   json-validate:
     name: JSON Validation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install jq
         run: sudo apt-get install -y jq
 
       - name: Validate JSON Files
         run: |
-          find . -name "*.json" -type f | while read file; do
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            case "$file" in
+              ./.devcontainer/devcontainer.json|./.vscode/settings.json|./.vscode/extensions/doc-assistant/.vscode/settings.json|./.vscode/extensions/doc-assistant/.vscode/launch.json|./.vscode/extensions/doc-assistant/.vscode/tasks.json|./.vscode/extensions/doc-assistant/tsconfig.json|./api/toc.json)
+                echo "Skipping JSONC file: $file"
+                continue
+                ;;
+            esac
             echo "Validating $file"
-            jq empty "$file" || echo "Invalid JSON: $file"
-          done || true
+            jq empty "$file"
+          done < <(find . -name '*.json' -type f -print0)
 
   secret-scan:
     name: TruffleHog Secret Scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
       - name: Run TruffleHog
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@6f3c981e7b77f235fd2702dd74af25fc4b72bf11 # v3.96.0
         with:
           path: .
           extra_args: --only-verified

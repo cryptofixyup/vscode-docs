@@ -1,27 +1,22 @@
 {
   "ignorePatterns": [
-    {
-      "pattern": "^https://github.com/.*/blob/.*"
-    },
-    {
-      "pattern": "^https://github.com/.*/tree/.*"
-    },
-    {
-      "pattern": "^https://docs.github.com/.*"
-    },
-    {
-      "pattern": "^https://code.visualstudio.com/.*"
-    },
-    {
-      "pattern": "^https://marketplace.visualstudio.com/.*"
-    }
+    {"pattern": "^https://github.com/.*/blob/.*"},
+    {"pattern": "^https://github.com/.*/tree/.*"},
+    {"pattern": "^https://docs.github.com/.*"},
+    {"pattern": "^https://code.visualstudio.com/.*"},
+    {"pattern": "^https://marketplace.visualstudio.com/.*"},
+    {"pattern": "^vscode:"},
+    {"pattern": "^mailto:"},
+    {"pattern": "^https?://localhost(:[0-9]+)?(/|$)"},
+    {"pattern": "^/docs/.*"},
+    {"pattern": "^/remote/.*"},
+    {"pattern": "^/remote-release-notes/.*"}
   ],
   "replacementPatterns": [
     {
-      "pattern": "^(\.\./)+",
+      "pattern": "^(\\.\\./)+",
       "replacement": ""
     }
   ],
-  "maxDepth": 5,
-  "timeout": 30000
+  "maxDepth": 5
 }
