@@ -8,6 +8,7 @@ on:
       - '**.json'
       - '**.yml'
       - '**.yaml'
+      - '.gitleaksignore'
   pull_request:
     branches: [ main ]
     paths:
@@ -15,6 +16,7 @@ on:
       - '**.json'
       - '**.yml'
       - '**.yaml'
+      - '.gitleaksignore'
   schedule:
     - cron: '0 0 * * *'
 
